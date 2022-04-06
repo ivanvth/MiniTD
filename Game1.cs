@@ -9,7 +9,8 @@ namespace MiniTD
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        Texture2D square;
+        Texture2D squareTexture2D;
+        Texture2D[] towerTexture2Ds = new Texture2D[1];
         int offSetX = 0;
 
         Tower[] towers = new Tower[5];
@@ -36,20 +37,21 @@ namespace MiniTD
             _graphics.PreferredBackBufferHeight = 480;
             _graphics.ApplyChanges();
 
-            for (int i=0; i<towers.Length; i++)
+            base.Initialize();
+
+            for (int i = 0; i < towers.Length; i++)
             {
                 Vector2 position = towerPositions[i];
-                towers[i] = new Tower((int)position.X + offSetX, (int)position.Y);
+                towers[i] = new Tower((int)position.X + offSetX, (int)position.Y, towerTexture2Ds[0]);
             }
-
-            base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            square = Content.Load<Texture2D>("square_001");
+            squareTexture2D = Content.Load<Texture2D>("square_001");
+            towerTexture2Ds[0] = Content.Load<Texture2D>("tower_005");
         }
 
         protected override void Update(GameTime gameTime)
@@ -77,56 +79,59 @@ namespace MiniTD
 
         private void DrawTowers()
         {
-            foreach (Vector2 postion in towerPositions)
+            for (int i=0; i<towers.Length; i++)
             {
-                _spriteBatch.Draw(square, new Vector2(postion.X + offSetX, postion.Y), Color.Red);
+                Vector2 towerPosition = towers[i].GetPosition();
+                Texture2D towerImage = towers[i].GetImage();
+                _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);
+                _spriteBatch.Draw(towerImage, new Vector2(towerPosition.X + offSetX, towerPosition.Y-32), Color.White);
             }
 
         }
         private void DrawPath()
         {
-            _spriteBatch.Draw(square, new Vector2(128 + offSetX, 0), Color.White);
-            _spriteBatch.Draw(square, new Vector2(128 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(96 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(64 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 96), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 128), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 160), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 192), Color.White);
-            _spriteBatch.Draw(square, new Vector2(32 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(64 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(64 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(square, new Vector2(96 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(square, new Vector2(128 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(square, new Vector2(160 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(square, new Vector2(160 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(192 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(224 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(256 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(256 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(square, new Vector2(256 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(square, new Vector2(288 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(square, new Vector2(320 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(square, new Vector2(352 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(square, new Vector2(384 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(square, new Vector2(384 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(square, new Vector2(384 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(square, new Vector2(384 + offSetX, 192), Color.White);
-            _spriteBatch.Draw(square, new Vector2(384 + offSetX, 160), Color.White);
-            _spriteBatch.Draw(square, new Vector2(352 + offSetX, 160), Color.White);
-            _spriteBatch.Draw(square, new Vector2(352 + offSetX, 128), Color.White);
-            _spriteBatch.Draw(square, new Vector2(352 + offSetX, 96), Color.White);
-            _spriteBatch.Draw(square, new Vector2(352 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(square, new Vector2(320 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(square, new Vector2(288 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(square, new Vector2(288 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(256 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(224 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(192 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(160 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(square, new Vector2(160 + offSetX, 0), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(128 + offSetX, 0), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(128 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(96 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(64 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 96), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 128), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 160), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 192), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(64 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(64 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(96 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(128 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(192 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(224 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(288 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(320 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 192), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 160), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 160), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 128), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 96), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(320 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(288 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(288 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(224 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(192 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 0), Color.White);
         } 
     }
 }
