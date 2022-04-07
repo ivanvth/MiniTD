@@ -1,18 +1,24 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MiniTD
 {
     public class Game1 : Game
     {
+        bool equal = true;
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        Texture2D bulletTexture2D;
         Texture2D squareTexture2D;
         Texture2D[] towerTexture2Ds = new Texture2D[1];
         int offSetX = 0;
 
+        List<Bullet> bullets = new List<Bullet>();
         Tower[] towers = new Tower[5];
         Vector2[] towerPositions = new Vector2[5]
         {
@@ -52,6 +58,7 @@ namespace MiniTD
 
             squareTexture2D = Content.Load<Texture2D>("square_001");
             towerTexture2Ds[0] = Content.Load<Texture2D>("tower_005");
+            bulletTexture2D = Content.Load<Texture2D>("Bullet_001");
         }
 
         protected override void Update(GameTime gameTime)
@@ -59,24 +66,54 @@ namespace MiniTD
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            foreach (Tower tower in towers)
+            {
+                tower.Update();
+                if (tower.ReadyToShoot)
+                {
+                    bullets.Add(tower.Shoot());
+                }
+            }
+
+
+            foreach (Bullet bullet in bullets)
+            {
+                bullet.UpdatePosition();
+            }
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            if (equal)
+            {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+            
+            } else
+            {
+                GraphicsDevice.Clear(Color.Red);
+            }
+            
 
             _spriteBatch.Begin();
             DrawPath();
             DrawTowers();
+            DrawBullets();
             _spriteBatch.End();
 
 
             base.Draw(gameTime);
         }
 
+        private void DrawBullets()
+        {
+            foreach (Bullet bullet in bullets)
+            {
+                _spriteBatch.Draw(bulletTexture2D, bullet.Position, Color.White);
+            }
+        }
         private void DrawTowers()
         {
             for (int i=0; i<towers.Length; i++)
