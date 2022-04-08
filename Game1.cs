@@ -8,13 +8,21 @@ namespace MiniTD
 {
     public class Game1 : Game
     {
-        bool equal = true;
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
         Texture2D bulletTexture2D;
         Texture2D squareTexture2D;
+        Texture2D squareNorthEastTexture;
+        Texture2D squareNorthSouthTexture;
+        Texture2D squareNorthWestTexture;
+        Texture2D squareEastSouthTexture;
+        Texture2D squareEastWestTexture;
+        Texture2D squareSouthWestTexture;
+
+        
+
         Texture2D[] towerTexture2Ds = new Texture2D[1];
         int offSetX = 0;
 
@@ -29,18 +37,22 @@ namespace MiniTD
             new Vector2(192, 160)
         };
 
+        Texture2D enemyTexture;
+        Enemy[] enemies;
+        Vector2[] enemyRoute;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
         }
 
         protected override void Initialize()
         {
             _graphics.IsFullScreen = false;
-            _graphics.PreferredBackBufferWidth = 640;
-            _graphics.PreferredBackBufferHeight = 480;
+            _graphics.PreferredBackBufferWidth = 1024;
+            _graphics.PreferredBackBufferHeight = 768;
             _graphics.ApplyChanges();
 
             base.Initialize();
@@ -50,13 +62,39 @@ namespace MiniTD
                 Vector2 position = towerPositions[i];
                 towers[i] = new Tower((int)position.X + offSetX, (int)position.Y, towerTexture2Ds[0]);
             }
+
+            enemyRoute = new Vector2[]
+            {
+                new Vector2(128 + offSetX, -10),
+                new Vector2(128 + offSetX, 0),
+                new Vector2(128 + offSetX, 10),
+                new Vector2(128 + offSetX, 100),
+                new Vector2(64 + offSetX, 100)
+            };
+
+            enemies = new Enemy[]
+            {
+                new Enemy(enemyRoute[0], 10, enemyRoute[1..], new Animation(enemyTexture))
+            };
+
+            
+
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            squareTexture2D = Content.Load<Texture2D>("square_001");
+            squareTexture2D = Content.Load<Texture2D>("square_002");
+            squareNorthEastTexture = Content.Load<Texture2D>("squareNorthEast_002");
+            squareNorthSouthTexture = Content.Load<Texture2D>("squareNorthSouth_002");
+            squareNorthWestTexture = Content.Load<Texture2D>("squareNorthWest_002");
+            squareEastSouthTexture = Content.Load<Texture2D>("squareEastSouth_002");
+            squareEastWestTexture = Content.Load<Texture2D>("squareEastWest_002");
+            squareSouthWestTexture = Content.Load<Texture2D>("squareSouthWest_002");
+
+            enemyTexture = Content.Load<Texture2D>("mob1_003");
+
             towerTexture2Ds[0] = Content.Load<Texture2D>("tower_005");
             bulletTexture2D = Content.Load<Texture2D>("Bullet_001");
         }
@@ -75,10 +113,14 @@ namespace MiniTD
                 }
             }
 
-
             foreach (Bullet bullet in bullets)
             {
-                bullet.UpdatePosition();
+                bullet.Update();
+            }
+
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Update(gameTime);
             }
 
             base.Update(gameTime);
@@ -87,19 +129,12 @@ namespace MiniTD
         protected override void Draw(GameTime gameTime)
         {
 
-            if (equal)
-            {
-                GraphicsDevice.Clear(Color.CornflowerBlue);
-            
-            } else
-            {
-                GraphicsDevice.Clear(Color.Red);
-            }
-            
+            GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
             DrawPath();
             DrawTowers();
+            DrawEnemies();
             DrawBullets();
             _spriteBatch.End();
 
@@ -107,6 +142,13 @@ namespace MiniTD
             base.Draw(gameTime);
         }
 
+        private void DrawEnemies()
+        {
+            foreach (Enemy enemy in enemies)
+            {
+                _spriteBatch.Draw(enemyTexture, enemy.Position, enemy.GetAnimation(), Color.White);
+            }
+        }
         private void DrawBullets()
         {
             foreach (Bullet bullet in bullets)
@@ -127,48 +169,48 @@ namespace MiniTD
         }
         private void DrawPath()
         {
-            _spriteBatch.Draw(squareTexture2D, new Vector2(128 + offSetX, 0), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(128 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(96 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(64 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 96), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 128), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 160), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 192), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(32 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(64 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(64 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(96 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(128 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(192 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(224 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(288 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(320 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 288), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 256), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 224), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 192), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(384 + offSetX, 160), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 160), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 128), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 96), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(352 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(320 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(288 + offSetX, 64), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(288 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(256 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(224 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(192 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 32), Color.White);
-            _spriteBatch.Draw(squareTexture2D, new Vector2(160 + offSetX, 0), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(128 + offSetX, 0), Color.White);
+            _spriteBatch.Draw(squareNorthWestTexture, new Vector2(128 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(96 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(64 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareEastSouthTexture, new Vector2(32 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(32 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(32 + offSetX, 96), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(32 + offSetX, 128), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(32 + offSetX, 160), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(32 + offSetX, 192), Color.White);
+            _spriteBatch.Draw(squareNorthEastTexture, new Vector2(32 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareSouthWestTexture, new Vector2(64 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareNorthEastTexture, new Vector2(64 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(96 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(128 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareNorthWestTexture, new Vector2(160 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareEastSouthTexture, new Vector2(160 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(192 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(224 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareSouthWestTexture, new Vector2(256 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(256 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareNorthEastTexture, new Vector2(256 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(288 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(320 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(352 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareNorthWestTexture, new Vector2(384 + offSetX, 288), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(384 + offSetX, 256), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(384 + offSetX, 224), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(384 + offSetX, 192), Color.White);
+            _spriteBatch.Draw(squareSouthWestTexture, new Vector2(384 + offSetX, 160), Color.White);
+            _spriteBatch.Draw(squareNorthEastTexture, new Vector2(352 + offSetX, 160), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(352 + offSetX, 128), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(352 + offSetX, 96), Color.White);
+            _spriteBatch.Draw(squareSouthWestTexture, new Vector2(352 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(320 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareNorthEastTexture, new Vector2(288 + offSetX, 64), Color.White);
+            _spriteBatch.Draw(squareSouthWestTexture, new Vector2(288 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(256 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(224 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareEastWestTexture, new Vector2(192 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareNorthEastTexture, new Vector2(160 + offSetX, 32), Color.White);
+            _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(160 + offSetX, 0), Color.White);
         } 
     }
 }

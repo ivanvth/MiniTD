@@ -48,7 +48,7 @@ namespace MiniTD
         {
             ReadyToShoot = false;
             lastShot = DateTime.Now;
-            return new Bullet(this.position, new Vector2(10, 10), 10);
+            return new Bullet(this.position, new Vector2(10, 10), 300);
             
         }
         public Texture2D GetImage()

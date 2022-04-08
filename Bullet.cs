@@ -18,7 +18,11 @@ namespace MiniTD
             this.speed = speed;
         }
 
-        public void UpdatePosition()
+        public void Update()
+        {
+            UpdatePosition();
+        }
+        private void UpdatePosition()
         {
             float positionX = Position.X;
             float positionY = Position.Y;
