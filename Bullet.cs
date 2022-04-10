@@ -8,25 +8,35 @@ namespace MiniTD
     class Bullet
     {
         public Vector2 Position { get; private set; }
-        Vector2 direction;
+        private Vector2 StartingPosition;
+        Vector2 targetPosition;
+        Vector2 Direction;
         float speed;
+        float range;
 
-        public Bullet(Vector2 position, Vector2 direction, float speed)
+        public Bullet(Vector2 position, Vector2 targetPosition, float speed, float range)
         {
             Position = position;
-            this.direction = direction;
+            StartingPosition = position;
+            this.targetPosition = targetPosition;
+            this.Direction = targetPosition - Position;
+            Direction.Normalize();
             this.speed = speed;
+            this.range = range;
         }
 
-        public void Update()
+        public bool Update()
         {
+            if (Vector2.Distance(StartingPosition, Position) > range)
+            {
+                return false;
+            }
             UpdatePosition();
+            return true;
         }
         private void UpdatePosition()
         {
-            float positionX = Position.X;
-            float positionY = Position.Y;
-            Position = new Vector2(positionX + 0.01f * speed, positionY + 0.01f * speed);
+            Position += Direction * speed;
         }
     }
 }

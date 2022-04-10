@@ -21,7 +21,7 @@ namespace MiniTD
         Texture2D squareEastWestTexture;
         Texture2D squareSouthWestTexture;
 
-        
+        int level = 1;
 
         Texture2D[] towerTexture2Ds = new Texture2D[1];
         int offSetX = 0;
@@ -36,9 +36,9 @@ namespace MiniTD
             new Vector2(224, 128),
             new Vector2(192, 160)
         };
-
+        WaveSpawner waveSpawner;
         Texture2D enemyTexture;
-        Enemy[] enemies;
+        List<Enemy> enemies;
         Vector2[] enemyRoute;
 
         public Game1()
@@ -56,6 +56,7 @@ namespace MiniTD
             _graphics.ApplyChanges();
 
             base.Initialize();
+            
 
             for (int i = 0; i < towers.Length; i++)
             {
@@ -72,10 +73,8 @@ namespace MiniTD
                 new Vector2(64 + offSetX, 100)
             };
 
-            enemies = new Enemy[]
-            {
-                new Enemy(enemyRoute[0], 10, enemyRoute[1..], new Animation(enemyTexture))
-            };
+            waveSpawner = new WaveSpawner(enemyRoute, new Animation(enemyTexture));
+            enemies = waveSpawner.SpawnWave(level);
 
             
 
@@ -109,13 +108,20 @@ namespace MiniTD
                 tower.Update();
                 if (tower.ReadyToShoot)
                 {
-                    bullets.Add(tower.Shoot());
+                    bullets.Add(tower.Shoot(enemies));
                 }
             }
-
+            List<Bullet> bulletsToDelete = new List<Bullet>();
             foreach (Bullet bullet in bullets)
             {
-                bullet.Update();
+                if (!bullet.Update())
+                {
+                    bulletsToDelete.Add(bullet);
+                }
+            }
+            foreach (Bullet bullet in bulletsToDelete)
+            {
+                bullets.Remove(bullet);
             }
 
             foreach (Enemy enemy in enemies)

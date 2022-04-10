@@ -27,7 +27,7 @@ namespace MiniTD
             this.position = new Vector2(positionX, positionY);
             this.towerImage = towerImage;
             damageType = DamageType.Bullet;
-            range = 50;
+            range = 150;
             minDamage = 90;
             maxDamage = 110;
             targetLock = TargetLockType.Nearest;
@@ -44,12 +44,33 @@ namespace MiniTD
                 }
             }
         }
-        public Bullet Shoot()
+        public Bullet Shoot(List<Enemy> enemies)
         {
             ReadyToShoot = false;
             lastShot = DateTime.Now;
-            return new Bullet(this.position, new Vector2(10, 10), 300);
+            Vector2 targetPosition = GetTarget(enemies).Position;
+            return new Bullet(this.position, targetPosition, 3, range);
             
+        }
+
+        private Enemy GetTarget(List<Enemy> enemies)
+        {
+            if (enemies.Count != 0)
+            {
+                Enemy currentTarget = enemies[0];
+                float currentDistance = Vector2.Distance(currentTarget.Position, position);
+                for (int i=1; i<enemies.Count; i++)
+                {
+                    float newDistance = Vector2.Distance(enemies[i].Position, this.position);
+                    if (newDistance < range && newDistance < currentDistance)
+                    {
+                        currentTarget = enemies[i];
+                        currentDistance = newDistance;
+                    }
+                }
+                return currentTarget;
+            }
+            return null;
         }
         public Texture2D GetImage()
         {

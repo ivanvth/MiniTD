@@ -37,8 +37,8 @@ namespace MiniTD
         private void Move()
         {
             if (routeIndex < route.Length - 1 && 
-                Math.Abs(Position.X - (route[routeIndex]).X) < 0.1f &&
-                Math.Abs(Position.Y - (route[routeIndex]).Y) < 0.1f)
+                Math.Abs(Position.X - (route[routeIndex]).X) < 0.8f &&
+                Math.Abs(Position.Y - (route[routeIndex]).Y) < 0.8f)
             {
                 routeIndex++;
             }
