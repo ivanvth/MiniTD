@@ -12,18 +12,28 @@ namespace MiniTD
         Vector2 position;
         Texture2D towerImage;
 
+        Enemy currentTarget;
+        public bool HasTarget { get; private set; }
+
         float range;
         int minDamage;
         int maxDamage;
         DamageType damageType;
+
+        int screenWidth;
+        int screenHeight;
+
+        public bool IsActive = false;
 
         TimeSpan cooldown = TimeSpan.FromSeconds(1);
         DateTime lastShot;
         public bool ReadyToShoot { get; private set; }
         TargetLockType targetLock;
 
-        public Tower(int positionX, int positionY, Texture2D towerImage)
+        public Tower(int positionX, int positionY, Texture2D towerImage, int width, int height)
         {
+            this.screenWidth = width;
+            this.screenHeight = height;
             this.position = new Vector2(positionX, positionY);
             this.towerImage = towerImage;
             damageType = DamageType.Bullet;
@@ -34,11 +44,12 @@ namespace MiniTD
             lastShot = DateTime.Now;
         }
 
-        public void Update()
+        public void Update(List<Enemy> enemies)
         {
+            SetTarget(enemies);
             if (!ReadyToShoot)
             {
-                if (DateTime.Now - lastShot >= cooldown)
+                if (DateTime.Now - lastShot >= cooldown && HasTarget)
                 {
                     ReadyToShoot = true;
                 }
@@ -48,29 +59,30 @@ namespace MiniTD
         {
             ReadyToShoot = false;
             lastShot = DateTime.Now;
-            Vector2 targetPosition = GetTarget(enemies).Position;
-            return new Bullet(this.position, targetPosition, 3, range);
-            
+            return new Bullet(this.position, currentTarget.Position, 3, range, screenWidth, screenHeight);
         }
 
-        private Enemy GetTarget(List<Enemy> enemies)
+        private void SetTarget(List<Enemy> enemies)
         {
-            if (enemies.Count != 0)
+            float currentDistance = float.MaxValue;
+            currentTarget = null;
+            foreach (Enemy enemy in enemies)
             {
-                Enemy currentTarget = enemies[0];
-                float currentDistance = Vector2.Distance(currentTarget.Position, position);
-                for (int i=1; i<enemies.Count; i++)
+                float newDistance = Vector2.Distance(enemy.Position, this.position);
+                if (enemy.IsTargetable && newDistance < range && newDistance < currentDistance)
                 {
-                    float newDistance = Vector2.Distance(enemies[i].Position, this.position);
-                    if (newDistance < range && newDistance < currentDistance)
-                    {
-                        currentTarget = enemies[i];
-                        currentDistance = newDistance;
-                    }
+                    currentTarget = enemy;
+                    currentDistance = newDistance;
                 }
-                return currentTarget;
             }
-            return null;
+            
+            if (currentTarget is null)
+            {
+                HasTarget = false;
+            } else
+            {
+                HasTarget = true;
+            }
         }
         public Texture2D GetImage()
         {

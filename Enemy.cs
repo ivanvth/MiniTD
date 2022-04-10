@@ -16,8 +16,13 @@ namespace MiniTD
         float speed;
         Animation animation;
 
-        public Enemy(Vector2 position, int hp, Vector2[] route, Animation animation)
+        Vector2 minPosition = new Vector2(0, 0);
+        Vector2 maxPosition;
+        public bool IsTargetable { get; private set; } = false; 
+
+        public Enemy(Vector2 position, int hp, Vector2[] route, Animation animation, int maxX, int maxY)
         {
+            maxPosition = new Vector2(maxX, maxY);
             this.animation = animation;
             Position = position;
             this.hp = hp;
@@ -29,6 +34,21 @@ namespace MiniTD
         {
             animation.Update(gameTime);
             Move();
+            SetTargetable();
+        }
+
+        private void SetTargetable()
+        {
+            if (Position.X > 0 &&
+                Position.X < maxPosition.X &&
+                Position.Y > 0 &&
+                Position.Y < maxPosition.Y)
+            {
+                IsTargetable = true;
+            } else
+            {
+                IsTargetable = false;
+            }
         }
         public Rectangle GetAnimation()
         {
@@ -37,8 +57,8 @@ namespace MiniTD
         private void Move()
         {
             if (routeIndex < route.Length - 1 && 
-                Math.Abs(Position.X - (route[routeIndex]).X) < 0.8f &&
-                Math.Abs(Position.Y - (route[routeIndex]).Y) < 0.8f)
+                Math.Abs(Position.X - (route[routeIndex]).X) < 1f &&
+                Math.Abs(Position.Y - (route[routeIndex]).Y) < 1f)
             {
                 routeIndex++;
             }

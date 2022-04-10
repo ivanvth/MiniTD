@@ -23,6 +23,11 @@ namespace MiniTD
 
         int level = 1;
 
+        bool upKeyWasDown = false;
+        bool rightKeyWasDown = false;
+        bool downKeyWasDown = false;
+        bool leftKeyWasDown = false;
+
         Texture2D[] towerTexture2Ds = new Texture2D[1];
         int offSetX = 0;
 
@@ -36,6 +41,8 @@ namespace MiniTD
             new Vector2(224, 128),
             new Vector2(192, 160)
         };
+        int activeTower = 2;
+
         WaveSpawner waveSpawner;
         Texture2D enemyTexture;
         List<Enemy> enemies;
@@ -57,12 +64,18 @@ namespace MiniTD
 
             base.Initialize();
             
-
+            
             for (int i = 0; i < towers.Length; i++)
             {
                 Vector2 position = towerPositions[i];
-                towers[i] = new Tower((int)position.X + offSetX, (int)position.Y, towerTexture2Ds[0]);
+                towers[i] = new Tower(
+                    (int)position.X + offSetX, 
+                    (int)position.Y, 
+                    towerTexture2Ds[0], 
+                    _graphics.PreferredBackBufferWidth, 
+                    _graphics.PreferredBackBufferHeight);
             }
+            towers[activeTower].IsActive = true;
 
             enemyRoute = new Vector2[]
             {
@@ -73,7 +86,7 @@ namespace MiniTD
                 new Vector2(64 + offSetX, 100)
             };
 
-            waveSpawner = new WaveSpawner(enemyRoute, new Animation(enemyTexture));
+            waveSpawner = new WaveSpawner(enemyRoute, new Animation(enemyTexture), _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             enemies = waveSpawner.SpawnWave(level);
 
             
@@ -103,25 +116,81 @@ namespace MiniTD
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            foreach (Tower tower in towers)
+            if (Keyboard.GetState().IsKeyDown(Keys.Left)) 
             {
-                tower.Update();
-                if (tower.ReadyToShoot)
+                leftKeyWasDown = true;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            {
+                rightKeyWasDown = true;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                upKeyWasDown = true;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+            {
+                downKeyWasDown = true;
+            }
+
+            if (Keyboard.GetState().IsKeyUp(Keys.Left) && leftKeyWasDown)
+            {
+                leftKeyWasDown = false;
+                SelectTower(Keys.Left);
+            } 
+            if (Keyboard.GetState().IsKeyUp(Keys.Right) && rightKeyWasDown)
+            {
+                rightKeyWasDown = false;
+                SelectTower(Keys.Right);
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Up) && upKeyWasDown)
+            {
+                upKeyWasDown = false;
+                SelectTower(Keys.Up);
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Down) && downKeyWasDown)
+            {
+                downKeyWasDown = false;
+                SelectTower(Keys.Down);
+            }
+
+
+            for (int i=0; i<towers.Length; i++)
+            {
+                towers[i].IsActive = (i == activeTower);
+                towers[i].Update(enemies);
+                if (towers[i].ReadyToShoot)
                 {
-                    bullets.Add(tower.Shoot(enemies));
+                    bullets.Add(towers[i].Shoot(enemies));
                 }
             }
+
+            List<Enemy> enemiesToDelete = new List<Enemy>();
             List<Bullet> bulletsToDelete = new List<Bullet>();
             foreach (Bullet bullet in bullets)
             {
-                if (!bullet.Update())
+                if (!bullet.Update() || bullet.ReadyForDeletion)
                 {
                     bulletsToDelete.Add(bullet);
                 }
+                foreach (Enemy enemy in enemies)
+                {
+                    if (!bullet.ReadyForDeletion && Vector2.Distance(enemy.Position, bullet.Position) < 3f)
+                    {
+                        enemiesToDelete.Add(enemy);
+                        bulletsToDelete.Add(bullet);
+                        bullet.ReadyForDeletion = true;
+                    }
+                }
             }
+
             foreach (Bullet bullet in bulletsToDelete)
             {
                 bullets.Remove(bullet);
+            }
+            foreach (Enemy enemy in enemiesToDelete)
+            {
+                enemies.Remove(enemy);
             }
 
             foreach (Enemy enemy in enemies)
@@ -168,10 +237,109 @@ namespace MiniTD
             {
                 Vector2 towerPosition = towers[i].GetPosition();
                 Texture2D towerImage = towers[i].GetImage();
-                _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);
+                if (towers[i].IsActive)
+                {
+                    //_spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + 10, towerPosition.Y), Color.Red);
+                } else
+                {
+                    _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);
+                }
+                
                 _spriteBatch.Draw(towerImage, new Vector2(towerPosition.X + offSetX, towerPosition.Y-32), Color.White);
             }
 
+        }
+
+        private void SelectTower(Keys key)
+        {
+            switch (activeTower)
+            {
+                case 0:
+                    switch (key)
+                    {
+                        case Keys.Up:
+                            activeTower = 4;
+                            break;
+                        case Keys.Right:
+                            activeTower = 3;
+                            break;
+                        case Keys.Down:
+                            activeTower = 2;
+                            break;
+                        case Keys.Left:
+                            activeTower = 1;
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch (key)
+                    {
+                        case Keys.Up:
+                            activeTower = 0;
+                            break;
+                        case Keys.Right:
+                            activeTower = 2;
+                            break;
+                        case Keys.Down:
+                            activeTower = 4;
+                            break;
+                        case Keys.Left:
+                            activeTower = 3;
+                            break;
+                    }
+                    break;
+                case 2:
+                    switch (key)
+                    {
+                        case Keys.Up:
+                            activeTower = 0;
+                            break;
+                        case Keys.Right:
+                            activeTower = 3;
+                            break;
+                        case Keys.Down:
+                            activeTower = 4;
+                            break;
+                        case Keys.Left:
+                            activeTower = 1;
+                            break;
+                    }
+                    break;
+                case 3:
+                    switch (key)
+                    {
+                        case Keys.Up:
+                            activeTower = 0;
+                            break;
+                        case Keys.Right:
+                            activeTower = 1;
+                            break;
+                        case Keys.Down:
+                            activeTower = 4;
+                            break;
+                        case Keys.Left:
+                            activeTower = 2;
+                            break;
+                    }
+                    break;
+                case 4:
+                    switch (key)
+                    {
+                        case Keys.Up:
+                            activeTower = 2;
+                            break;
+                        case Keys.Right:
+                            activeTower = 3;
+                            break;
+                        case Keys.Down:
+                            activeTower = 0;
+                            break;
+                        case Keys.Left:
+                            activeTower = 1;
+                            break;
+                    }
+                    break;
+            }
         }
         private void DrawPath()
         {
