@@ -12,7 +12,7 @@ namespace MiniTD
         public Vector2 Position { get; private set; }
         Vector2[] route;
         int routeIndex = 0;
-        int hp;
+        public int Health { get; private set; }
         float speed;
         Animation animation;
 
@@ -25,7 +25,7 @@ namespace MiniTD
             maxPosition = new Vector2(maxX, maxY);
             this.animation = animation;
             Position = position;
-            this.hp = hp;
+            this.Health = hp;
             this.route = route;
             speed = 0.5f;
         }

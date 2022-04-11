@@ -14,6 +14,7 @@ namespace MiniTD
 
         Texture2D bulletTexture2D;
         Texture2D squareTexture2D;
+        Texture2D activeSquareTexture2D;
         Texture2D squareNorthEastTexture;
         Texture2D squareNorthSouthTexture;
         Texture2D squareNorthWestTexture;
@@ -98,6 +99,7 @@ namespace MiniTD
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             squareTexture2D = Content.Load<Texture2D>("square_002");
+            activeSquareTexture2D = Content.Load<Texture2D>("redsquare_001");
             squareNorthEastTexture = Content.Load<Texture2D>("squareNorthEast_002");
             squareNorthSouthTexture = Content.Load<Texture2D>("squareNorthSouth_002");
             squareNorthWestTexture = Content.Load<Texture2D>("squareNorthWest_002");
@@ -239,7 +241,7 @@ namespace MiniTD
                 Texture2D towerImage = towers[i].GetImage();
                 if (towers[i].IsActive)
                 {
-                    //_spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + 10, towerPosition.Y), Color.Red);
+                    _spriteBatch.Draw(activeSquareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);
                 } else
                 {
                     _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);

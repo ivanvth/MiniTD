@@ -61,6 +61,18 @@
 /processorParam:TextureFormat=Color
 /build:mob1_003.png
 
+#begin redsquare_001.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:redsquare_001.png
+
 #begin square_001.png
 /importer:TextureImporter
 /processor:TextureProcessor

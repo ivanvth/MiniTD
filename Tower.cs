@@ -29,6 +29,7 @@ namespace MiniTD
         DateTime lastShot;
         public bool ReadyToShoot { get; private set; }
         TargetLockType targetLock;
+        ITargetStrategy targetStrategy;
 
         public Tower(int positionX, int positionY, Texture2D towerImage, int width, int height)
         {
@@ -41,6 +42,7 @@ namespace MiniTD
             minDamage = 90;
             maxDamage = 110;
             targetLock = TargetLockType.Nearest;
+            targetStrategy = NearestTargetStrat.GetStaticInstance();
             lastShot = DateTime.Now;
         }
 
@@ -64,26 +66,10 @@ namespace MiniTD
 
         private void SetTarget(List<Enemy> enemies)
         {
-            float currentDistance = float.MaxValue;
-            currentTarget = null;
-            foreach (Enemy enemy in enemies)
-            {
-                float newDistance = Vector2.Distance(enemy.Position, this.position);
-                if (enemy.IsTargetable && newDistance < range && newDistance < currentDistance)
-                {
-                    currentTarget = enemy;
-                    currentDistance = newDistance;
-                }
-            }
-            
-            if (currentTarget is null)
-            {
-                HasTarget = false;
-            } else
-            {
-                HasTarget = true;
-            }
+            currentTarget = targetStrategy.GetTarget(enemies, this.position, range);
+            HasTarget = currentTarget != null;
         }
+
         public Texture2D GetImage()
         {
             return this.towerImage;
