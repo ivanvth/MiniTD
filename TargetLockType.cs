@@ -7,8 +7,10 @@ namespace MiniTD
     enum TargetLockType
     {
         Nearest,
+        Furthest,
         HighHP,
         LowHP,
-        Furthest
+        First,
+        Last
     }
 }

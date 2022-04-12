@@ -42,7 +42,7 @@ namespace MiniTD
             minDamage = 90;
             maxDamage = 110;
             targetLock = TargetLockType.Nearest;
-            targetStrategy = NearestTargetStrat.GetStaticInstance();
+            targetStrategy = TargetStrategies.LastTargetStrat.GetStaticInstance();
             lastShot = DateTime.Now;
         }
 
@@ -67,7 +67,32 @@ namespace MiniTD
         private void SetTarget(List<Enemy> enemies)
         {
             currentTarget = targetStrategy.GetTarget(enemies, this.position, range);
-            HasTarget = currentTarget != null;
+            HasTarget = currentTarget != null;  
+        }
+
+        private void SetTargetStrategy(TargetLockType strat)
+        {
+            switch (strat)
+            {
+                case TargetLockType.Nearest:
+                    targetStrategy = TargetStrategies.NearestTargetStrat.GetStaticInstance();
+                    break;
+                case TargetLockType.Furthest:
+                    targetStrategy = TargetStrategies.FurthestTargetStrat.GetStaticInstance();
+                    break;
+                case TargetLockType.HighHP:
+                    targetStrategy = TargetStrategies.HighestHealthTargetStrat.GetStaticInstance();
+                    break;
+                case TargetLockType.LowHP:
+                    targetStrategy = TargetStrategies.LowestHealthTargetStrat.GetStaticInstance();
+                    break;
+                case TargetLockType.First:
+                    targetStrategy = TargetStrategies.FirstTargetStrat.GetStaticInstance();
+                    break;
+                case TargetLockType.Last:
+                    targetStrategy = TargetStrategies.LastTargetStrat.GetStaticInstance();
+                    break;
+            }
         }
 
         public Texture2D GetImage()

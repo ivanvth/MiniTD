@@ -9,6 +9,8 @@ namespace MiniTD
 {
     class Enemy
     {
+        static int GlobalID; 
+        public int ID { get; private set; } 
         public Vector2 Position { get; private set; }
         Vector2[] route;
         int routeIndex = 0;
@@ -22,6 +24,7 @@ namespace MiniTD
 
         public Enemy(Vector2 position, int hp, Vector2[] route, Animation animation, int maxX, int maxY)
         {
+            this.ID = GlobalID++;
             maxPosition = new Vector2(maxX, maxY);
             this.animation = animation;
             Position = position;
@@ -67,5 +70,6 @@ namespace MiniTD
             direction.Normalize();
             this.Position += direction * speed;
         }
+
     }
 }

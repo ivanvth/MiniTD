@@ -90,7 +90,10 @@ namespace MiniTD
             waveSpawner = new WaveSpawner(enemyRoute, new Animation(enemyTexture), _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             enemies = waveSpawner.SpawnWave(level);
 
-            
+            foreach (Enemy enemy in enemies)
+            {
+                Debug.WriteLine(enemy.ID);
+            }
 
         }
 

@@ -5,29 +5,30 @@ using System.Text;
 
 namespace MiniTD.TargetStrategies
 {
-    class NearestTargetStrat : ITargetStrategy
+    class FirstTargetStrat : ITargetStrategy
     {
-        static NearestTargetStrat instance = null;
+        static FirstTargetStrat instance = null;
         public static ITargetStrategy GetStaticInstance()
         {
             if (instance is null)
             {
-                instance = new NearestTargetStrat();
+                instance = new FirstTargetStrat();
             }
             return instance;
         }
 
         public Enemy GetTarget(List<Enemy> enemies, Vector2 towerPosition, float towerRange)
         {
-            float currentDistance = float.MaxValue;
+            int currentLowestID = int.MaxValue;
             Enemy currentTarget = null;
             foreach (Enemy enemy in enemies)
             {
+                int newID = enemy.ID;
                 float newDistance = Vector2.Distance(enemy.Position, towerPosition);
-                if (enemy.IsTargetable && newDistance < towerRange && newDistance < currentDistance)
+                if (enemy.IsTargetable && newDistance < towerRange && newID < currentLowestID)
                 {
                     currentTarget = enemy;
-                    currentDistance = newDistance;
+                    currentLowestID = newID;
                 }
             }
             return currentTarget;
