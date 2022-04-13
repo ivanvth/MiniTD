@@ -42,7 +42,7 @@ namespace MiniTD
             minDamage = 90;
             maxDamage = 110;
             targetLock = TargetLockType.Nearest;
-            targetStrategy = TargetStrategies.LastTargetStrat.GetStaticInstance();
+            targetStrategy = TargetStrategies.FirstTargetStrat.GetStaticInstance();
             lastShot = DateTime.Now;
         }
 

@@ -46,8 +46,11 @@ namespace MiniTD
 
         WaveSpawner waveSpawner;
         Texture2D enemyTexture;
-        List<Enemy> enemies;
+        List<Enemy> enemies = new List<Enemy>();
         Vector2[] enemyRoute;
+
+        int monsterRouteOffsetX = 16;
+        int monsterRouteOffsetY = 16;
 
         public Game1()
         {
@@ -80,21 +83,18 @@ namespace MiniTD
 
             enemyRoute = new Vector2[]
             {
-                new Vector2(128 + offSetX, -10),
-                new Vector2(128 + offSetX, 0),
+                new Vector2(128 + offSetX + monsterRouteOffsetX, 0 + monsterRouteOffsetY),
                 new Vector2(128 + offSetX, 10),
                 new Vector2(128 + offSetX, 100),
                 new Vector2(64 + offSetX, 100)
             };
 
-            waveSpawner = new WaveSpawner(enemyRoute, new Animation(enemyTexture), _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-            enemies = waveSpawner.SpawnWave(level);
+            waveSpawner = new WaveSpawner(enemyRoute, 
+                                          new Animation(enemyTexture), 
+                                          _graphics.PreferredBackBufferWidth, 
+                                          _graphics.PreferredBackBufferHeight);
 
-            foreach (Enemy enemy in enemies)
-            {
-                Debug.WriteLine(enemy.ID);
-            }
-
+            enemies.AddRange(waveSpawner.GetEnemies());
         }
 
         protected override void LoadContent()
@@ -159,6 +159,8 @@ namespace MiniTD
                 SelectTower(Keys.Down);
             }
 
+            waveSpawner.Update(gameTime);
+            enemies.AddRange(waveSpawner.GetEnemies());
 
             for (int i=0; i<towers.Length; i++)
             {
