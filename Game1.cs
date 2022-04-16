@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -8,6 +9,11 @@ namespace MiniTD
 {
     public class Game1 : Game
     {
+        //public EventHandler eventHandler;
+
+        GUIHandlerRight gui;
+
+        Player player = new Player();
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -22,25 +28,26 @@ namespace MiniTD
         Texture2D squareEastWestTexture;
         Texture2D squareSouthWestTexture;
 
-        int level = 1;
+        SpriteFont defaultFont;
 
-        bool upKeyWasDown = false;
-        bool rightKeyWasDown = false;
-        bool downKeyWasDown = false;
-        bool leftKeyWasDown = false;
+        bool upKeyWasUp = true;
+        bool rightKeyWasUp = true;
+        bool downKeyWasUp = true;
+        bool leftKeyWasUp = true;
+        bool spaceKeyWasUp = true;
 
         Texture2D[] towerTexture2Ds = new Texture2D[1];
-        int offSetX = 0;
+        int offSetX = 144;
 
         List<Bullet> bullets = new List<Bullet>();
         Tower[] towers = new Tower[5];
         Vector2[] towerPositions = new Vector2[5]
         {
-            new Vector2(192, 96),
-            new Vector2(160, 128),
-            new Vector2(192, 128),
-            new Vector2(224, 128),
-            new Vector2(192, 160)
+            new Vector2(192+144, 96),
+            new Vector2(160+144, 128),
+            new Vector2(192+144, 128),
+            new Vector2(224+144, 128),
+            new Vector2(192+144, 160)
         };
         int activeTower = 2;
 
@@ -49,8 +56,10 @@ namespace MiniTD
         List<Enemy> enemies = new List<Enemy>();
         Vector2[] enemyRoute;
 
-        int monsterRouteOffsetX = 16;
-        int monsterRouteOffsetY = 16;
+        int monsterRouteOffsetX = 8;
+        int monsterRouteOffsetY = 8;
+
+        ActiveUIType activeUI = ActiveUIType.Main;
 
         public Game1()
         {
@@ -62,8 +71,8 @@ namespace MiniTD
         protected override void Initialize()
         {
             _graphics.IsFullScreen = false;
-            _graphics.PreferredBackBufferWidth = 1024;
-            _graphics.PreferredBackBufferHeight = 768;
+            _graphics.PreferredBackBufferWidth = 800;
+            _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
 
             base.Initialize();
@@ -73,7 +82,7 @@ namespace MiniTD
             {
                 Vector2 position = towerPositions[i];
                 towers[i] = new Tower(
-                    (int)position.X + offSetX, 
+                    (int)position.X, 
                     (int)position.Y, 
                     towerTexture2Ds[0], 
                     _graphics.PreferredBackBufferWidth, 
@@ -83,10 +92,24 @@ namespace MiniTD
 
             enemyRoute = new Vector2[]
             {
-                new Vector2(128 + offSetX + monsterRouteOffsetX, 0 + monsterRouteOffsetY),
-                new Vector2(128 + offSetX, 10),
-                new Vector2(128 + offSetX, 100),
-                new Vector2(64 + offSetX, 100)
+                new Vector2(280, 2),
+                new Vector2(280, 38),
+                new Vector2(184, 38),
+                new Vector2(184, 230),
+                new Vector2(216, 230),
+                new Vector2(216, 262),
+                new Vector2(312, 262),
+                new Vector2(312, 230),
+                new Vector2(408, 230),
+                new Vector2(408, 294),
+                new Vector2(536, 294),
+                new Vector2(536, 166),
+                new Vector2(504, 166),
+                new Vector2(504, 70),
+                new Vector2(440, 70),
+                new Vector2(440, 38),
+                new Vector2(312, 38),
+                new Vector2(312, 2)
             };
 
             waveSpawner = new WaveSpawner(enemyRoute, 
@@ -95,6 +118,8 @@ namespace MiniTD
                                           _graphics.PreferredBackBufferHeight);
 
             enemies.AddRange(waveSpawner.GetEnemies());
+
+            gui = new GUIHandlerRight(defaultFont);
         }
 
         protected override void LoadContent()
@@ -114,6 +139,8 @@ namespace MiniTD
 
             towerTexture2Ds[0] = Content.Load<Texture2D>("tower_005");
             bulletTexture2D = Content.Load<Texture2D>("Bullet_001");
+
+            defaultFont = Content.Load<SpriteFont>("DefaultFont");
         }
 
         protected override void Update(GameTime gameTime)
@@ -121,42 +148,15 @@ namespace MiniTD
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Left)) 
-            {
-                leftKeyWasDown = true;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
-            {
-                rightKeyWasDown = true;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Up))
-            {
-                upKeyWasDown = true;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Down))
-            {
-                downKeyWasDown = true;
-            }
+            //GameEventArgs eventArgs = new GameEventArgs(GameEventType.InputEvent);
 
-            if (Keyboard.GetState().IsKeyUp(Keys.Left) && leftKeyWasDown)
+            if (activeUI == ActiveUIType.Main)
             {
-                leftKeyWasDown = false;
-                SelectTower(Keys.Left);
-            } 
-            if (Keyboard.GetState().IsKeyUp(Keys.Right) && rightKeyWasDown)
-            {
-                rightKeyWasDown = false;
-                SelectTower(Keys.Right);
+                GameKeyboardController();
             }
-            if (Keyboard.GetState().IsKeyUp(Keys.Up) && upKeyWasDown)
+            else if (activeUI == ActiveUIType.Tower)
             {
-                upKeyWasDown = false;
-                SelectTower(Keys.Up);
-            }
-            if (Keyboard.GetState().IsKeyUp(Keys.Down) && downKeyWasDown)
-            {
-                downKeyWasDown = false;
-                SelectTower(Keys.Down);
+                TowerKeyboardController();
             }
 
             waveSpawner.Update(gameTime);
@@ -197,6 +197,7 @@ namespace MiniTD
             }
             foreach (Enemy enemy in enemiesToDelete)
             {
+                player.AddBounty(enemy);
                 enemies.Remove(enemy);
             }
 
@@ -204,6 +205,13 @@ namespace MiniTD
             {
                 enemy.Update(gameTime);
             }
+
+            gui.Update(towers[activeTower], 
+                       activeTower+1, 
+                       waveSpawner.Level, 
+                       bullets.Count, 
+                       enemies.Count, 
+                       player);
 
             base.Update(gameTime);
         }
@@ -218,6 +226,7 @@ namespace MiniTD
             DrawTowers();
             DrawEnemies();
             DrawBullets();
+            gui.Draw(_spriteBatch);
             _spriteBatch.End();
 
 
@@ -246,17 +255,70 @@ namespace MiniTD
                 Texture2D towerImage = towers[i].GetImage();
                 if (towers[i].IsActive)
                 {
-                    _spriteBatch.Draw(activeSquareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);
+                    _spriteBatch.Draw(activeSquareTexture2D, new Vector2(towerPosition.X, towerPosition.Y), Color.White);
                 } else
                 {
-                    _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X + offSetX, towerPosition.Y), Color.White);
+                    _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X, towerPosition.Y), Color.White);
                 }
                 
-                _spriteBatch.Draw(towerImage, new Vector2(towerPosition.X + offSetX, towerPosition.Y-32), Color.White);
+                _spriteBatch.Draw(towerImage, new Vector2(towerPosition.X, towerPosition.Y-32), Color.White);
             }
 
         }
 
+        private void TowerKeyboardController()
+        {
+
+        }
+        private void GameKeyboardController()
+        {
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && spaceKeyWasUp)
+            {
+                spaceKeyWasUp = false;
+                SelectTower(Keys.Space);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Left) && leftKeyWasUp)
+            {
+                leftKeyWasUp = false;
+                SelectTower(Keys.Left);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && rightKeyWasUp)
+            {
+                rightKeyWasUp = false;
+                SelectTower(Keys.Right);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Up) && upKeyWasUp)
+            {
+                upKeyWasUp = false;
+                SelectTower(Keys.Up);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Down) && downKeyWasUp)
+            {
+                downKeyWasUp = false;
+                SelectTower(Keys.Down);
+            }
+
+            if (Keyboard.GetState().IsKeyUp(Keys.Space))
+            {
+                spaceKeyWasUp = true;
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Left))
+            {
+                leftKeyWasUp = true;
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Right))
+            {
+                rightKeyWasUp = true;
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Up))
+            {
+                upKeyWasUp = true;
+            }
+            if (Keyboard.GetState().IsKeyUp(Keys.Down))
+            {
+                downKeyWasUp = true;
+            }
+        }
         private void SelectTower(Keys key)
         {
             switch (activeTower)

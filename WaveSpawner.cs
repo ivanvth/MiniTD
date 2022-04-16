@@ -12,7 +12,7 @@ namespace MiniTD
         int maxX;
         int maxY;
         List<Enemy> spawnedEnemies = new List<Enemy>();
-        int level;
+        public int Level { get; private set; }
         GameTime startTime;
         GameTime elapsedTime;
         float spawnTimer;
@@ -30,7 +30,7 @@ namespace MiniTD
             this.maxY = maxY;
             this.route = route;
             this.animation = animation;
-            this.level = 0;
+            this.Level = 1;
         }
 
         private void Spawn()
@@ -52,7 +52,7 @@ namespace MiniTD
             
             if (levelTimer > levelThreshold)
             {
-                level++;
+                Level++;
                 levelTimer = 0;
                 spawnTimer = 0;
             } 

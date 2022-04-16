@@ -15,9 +15,16 @@ namespace MiniTD
         Enemy currentTarget;
         public bool HasTarget { get; private set; }
 
-        float range;
+        public float Range;
         int minDamage;
         int maxDamage;
+        public int Damage
+        {
+            get 
+            {
+                return (int)((minDamage + maxDamage) / 2);
+            }
+        }
         DamageType damageType;
 
         int screenWidth;
@@ -25,10 +32,10 @@ namespace MiniTD
 
         public bool IsActive = false;
 
-        TimeSpan cooldown = TimeSpan.FromSeconds(1);
+        public TimeSpan Cooldown = TimeSpan.FromMilliseconds(2000);
         DateTime lastShot;
         public bool ReadyToShoot { get; private set; }
-        TargetLockType targetLock;
+        public TargetLockType TargetLock;
         ITargetStrategy targetStrategy;
 
         public Tower(int positionX, int positionY, Texture2D towerImage, int width, int height)
@@ -38,10 +45,10 @@ namespace MiniTD
             this.position = new Vector2(positionX, positionY);
             this.towerImage = towerImage;
             damageType = DamageType.Bullet;
-            range = 150;
+            Range = 150;
             minDamage = 90;
             maxDamage = 110;
-            targetLock = TargetLockType.Nearest;
+            TargetLock = TargetLockType.Nearest;
             targetStrategy = TargetStrategies.FirstTargetStrat.GetStaticInstance();
             lastShot = DateTime.Now;
         }
@@ -51,7 +58,7 @@ namespace MiniTD
             SetTarget(enemies);
             if (!ReadyToShoot)
             {
-                if (DateTime.Now - lastShot >= cooldown && HasTarget)
+                if (DateTime.Now - lastShot >= Cooldown && HasTarget)
                 {
                     ReadyToShoot = true;
                 }
@@ -61,12 +68,12 @@ namespace MiniTD
         {
             ReadyToShoot = false;
             lastShot = DateTime.Now;
-            return new Bullet(this.position, currentTarget.Position, 3, range, screenWidth, screenHeight);
+            return new Bullet(this.position, currentTarget.Position, 3, Range, screenWidth, screenHeight);
         }
 
         private void SetTarget(List<Enemy> enemies)
         {
-            currentTarget = targetStrategy.GetTarget(enemies, this.position, range);
+            currentTarget = targetStrategy.GetTarget(enemies, this.position, Range);
             HasTarget = currentTarget != null;  
         }
 

@@ -20,7 +20,9 @@ namespace MiniTD
 
         Vector2 minPosition = new Vector2(0, 0);
         Vector2 maxPosition;
-        public bool IsTargetable { get; private set; } = false; 
+        public bool IsTargetable { get; private set; } = false;
+
+        public int Bounty { get; set; } = 10;
 
         public Enemy(Vector2 position, int hp, Vector2[] route, Animation animation, int maxX, int maxY)
         {
@@ -30,7 +32,7 @@ namespace MiniTD
             Position = position;
             this.Health = hp;
             this.route = route;
-            speed = 0.5f;
+            speed = 2.5f;
         }
 
         public void Update(GameTime gameTime)
@@ -60,8 +62,8 @@ namespace MiniTD
         private void Move()
         {
             if (routeIndex < route.Length - 1 && 
-                Math.Abs(Position.X - (route[routeIndex]).X) < 1f &&
-                Math.Abs(Position.Y - (route[routeIndex]).Y) < 1f)
+                Math.Abs(Position.X - (route[routeIndex]).X) < 2f &&
+                Math.Abs(Position.Y - (route[routeIndex]).Y) < 2f)
             {
                 routeIndex++;
             }
