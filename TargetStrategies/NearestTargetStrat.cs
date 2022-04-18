@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace MiniTD.TargetStrategies
@@ -24,6 +25,7 @@ namespace MiniTD.TargetStrategies
             foreach (Enemy enemy in enemies)
             {
                 float newDistance = Vector2.Distance(enemy.Position, towerPosition);
+                Debug.WriteLine(newDistance);
                 if (enemy.IsTargetable && newDistance < towerRange && newDistance < currentDistance)
                 {
                     currentTarget = enemy;

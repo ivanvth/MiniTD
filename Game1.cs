@@ -56,6 +56,8 @@ namespace MiniTD
         List<Enemy> enemies = new List<Enemy>();
         Vector2[] enemyRoute;
 
+        List<Vector2> towerRangeVecs = new List<Vector2>();
+
         int monsterRouteOffsetX = 8;
         int monsterRouteOffsetY = 8;
 
@@ -176,14 +178,17 @@ namespace MiniTD
             List<Bullet> bulletsToDelete = new List<Bullet>();
             foreach (Bullet bullet in bullets)
             {
-                if (!bullet.Update() || bullet.ReadyForDeletion)
+                bullet.Update();
+                if (bullet.ReadyForDeletion)
                 {
                     bulletsToDelete.Add(bullet);
                 }
                 foreach (Enemy enemy in enemies)
                 {
-                    if (!bullet.ReadyForDeletion && Vector2.Distance(enemy.Position, bullet.Position) < 3f)
+                    Vector2 enemyCenter = new Vector2(enemy.Position.X+8, enemy.Position.Y+8);
+                    if (!bullet.ReadyForDeletion && Vector2.Distance(enemyCenter, bullet.Position) < 8f)
                     {
+                        Debug.WriteLine(enemy.ID + " hit!");
                         enemiesToDelete.Add(enemy);
                         bulletsToDelete.Add(bullet);
                         bullet.ReadyForDeletion = true;
@@ -197,6 +202,7 @@ namespace MiniTD
             }
             foreach (Enemy enemy in enemiesToDelete)
             {
+                Debug.WriteLine(enemy.ID + " deleted");
                 player.AddBounty(enemy);
                 enemies.Remove(enemy);
             }
@@ -221,8 +227,9 @@ namespace MiniTD
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
             DrawPath();
+            DrawTowerRanges();
             DrawTowers();
             DrawEnemies();
             DrawBullets();
@@ -247,12 +254,28 @@ namespace MiniTD
                 _spriteBatch.Draw(bulletTexture2D, bullet.Position, Color.White);
             }
         }
+
+        private void DrawTowerRanges()
+        {
+            foreach (Tower tower in towers)
+            {
+                if (towers[activeTower] == tower)
+                {
+                    _spriteBatch.Draw(
+                        CreateCircle(tower.Range * 2),
+                        new Vector2(tower.GetPosition().X - tower.Range + 16, tower.GetPosition().Y - tower.Range + 16),
+                        Color.Black * 0.1f);
+                }
+            }
+        }
         private void DrawTowers()
         {
             for (int i=0; i<towers.Length; i++)
             {
                 Vector2 towerPosition = towers[i].GetPosition();
                 Texture2D towerImage = towers[i].GetImage();
+                
+
                 if (towers[i].IsActive)
                 {
                     _spriteBatch.Draw(activeSquareTexture2D, new Vector2(towerPosition.X, towerPosition.Y), Color.White);
@@ -260,11 +283,46 @@ namespace MiniTD
                 {
                     _spriteBatch.Draw(squareTexture2D, new Vector2(towerPosition.X, towerPosition.Y), Color.White);
                 }
+
+                
                 
                 _spriteBatch.Draw(towerImage, new Vector2(towerPosition.X, towerPosition.Y-32), Color.White);
+                
+
             }
 
         }
+
+        private Texture2D CreateCircle(int diameter)
+        {
+            Texture2D texture = new Texture2D(_graphics.GraphicsDevice, diameter, diameter);
+            Color[] colorData = new Color[diameter * diameter];
+
+            float radius = diameter / 2f;
+            float radiusSquared = radius * radius;
+
+            for (int x = 0; x < diameter; x++)
+            {
+                for (int y = 0; y < diameter; y++)
+                {
+                    int index = x * diameter + y;
+                    Vector2 pos = new Vector2(x - radius, y - radius);
+                    if (pos.LengthSquared() <= radiusSquared)
+                    {
+                    
+                        colorData[index] = Color.White;
+                    }
+                    else
+                    {
+                        colorData[index] = Color.Transparent;
+                    }
+                }
+            }
+
+            texture.SetData(colorData);
+            return texture;
+        }
+
 
         private void TowerKeyboardController()
         {
@@ -410,6 +468,8 @@ namespace MiniTD
                     break;
             }
         }
+
+        
         private void DrawPath()
         {
             _spriteBatch.Draw(squareNorthSouthTexture, new Vector2(128 + offSetX, 0), Color.White);

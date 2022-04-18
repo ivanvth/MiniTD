@@ -15,7 +15,7 @@ namespace MiniTD
         Enemy currentTarget;
         public bool HasTarget { get; private set; }
 
-        public float Range;
+        public int Range;
         int minDamage;
         int maxDamage;
         public int Damage
@@ -45,10 +45,10 @@ namespace MiniTD
             this.position = new Vector2(positionX, positionY);
             this.towerImage = towerImage;
             damageType = DamageType.Bullet;
-            Range = 150;
+            Range = 100;
             minDamage = 90;
             maxDamage = 110;
-            TargetLock = TargetLockType.Nearest;
+            TargetLock = TargetLockType.First;
             targetStrategy = TargetStrategies.FirstTargetStrat.GetStaticInstance();
             lastShot = DateTime.Now;
         }
@@ -68,12 +68,15 @@ namespace MiniTD
         {
             ReadyToShoot = false;
             lastShot = DateTime.Now;
-            return new Bullet(this.position, currentTarget.Position, 3, Range, screenWidth, screenHeight);
+            Vector2 firePos = new Vector2(this.position.X, this.position.Y - 16);
+            return new Bullet(firePos, currentTarget.Position, 5, Range, screenWidth, screenHeight);
         }
 
         private void SetTarget(List<Enemy> enemies)
         {
-            currentTarget = targetStrategy.GetTarget(enemies, this.position, Range);
+            Vector2 targetPoint = new Vector2(this.position.X + 16, this.position.Y + 16);
+            
+            currentTarget = targetStrategy.GetTarget(enemies, targetPoint, Range);
             HasTarget = currentTarget != null;  
         }
 

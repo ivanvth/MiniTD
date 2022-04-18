@@ -32,15 +32,18 @@ namespace MiniTD
             this.maxY = height;
         }
 
-        public bool Update()
+        public void Update()
         {
             float distanceTravelled = Vector2.Distance(startingPosition, Position);
             if (distanceTravelled > range || Position.X < minX || Position.X > maxX || Position.Y < minY || Position.Y > maxY)
             {
-                return false;
+                ReadyForDeletion = true;
             }
-            UpdatePosition();
-            return true;
+            else
+            {
+                UpdatePosition();
+            }
+            
         }
         private void UpdatePosition()
         {

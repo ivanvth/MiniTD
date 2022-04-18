@@ -32,7 +32,7 @@ namespace MiniTD
             Position = position;
             this.Health = hp;
             this.route = route;
-            speed = 2.5f;
+            speed = 0.3f;
         }
 
         public void Update(GameTime gameTime)
